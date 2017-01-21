@@ -1,0 +1,24 @@
+# config/application.yml
+defaults: &defaults
+  connection:
+    time_out:
+    private_pem_path: 
+  API:
+    Spectre:
+      client_id: 
+      service_secret:
+      requests:
+        customers:
+          index: https://www.saltedge.com/api/v3/customers/ 
+
+
+
+development:
+  <<: *defaults
+  neat_setting: 800
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
