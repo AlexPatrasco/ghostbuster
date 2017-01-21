@@ -7,4 +7,6 @@
     = javascript_include_tag 'application', 'data-turbolinks-track': 'reload'
   %body
     = render partial: 'partials/auth'
+    - if flash[:notice]
+      = flash[:notice]
     = yield
