@@ -10,6 +10,8 @@ defaults: &defaults
       requests:
         customers:
           index: https://www.saltedge.com/api/v3/customers/ 
+        logins:
+          index: https://www.saltedge.com/api/v3/logins
 
 
 
