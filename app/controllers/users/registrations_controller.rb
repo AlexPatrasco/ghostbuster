@@ -10,7 +10,8 @@ before_action :configure_sign_up_params, only: [:create]
   # POST /resource
   def create
     api = SpectreClient.new
-    @response = api.request('post', Settings.API.Spectre.requests.customers.index, data:{identifier: params[:user][:email]})
+    url = Settings.API.Spectre.base_url + 'customers/'
+    @response = api.request('post', url, data:{identifier: params[:user][:email]})
     if @response.code == 200
       super do |resource|
         resource.update_attributes(spectre_params)

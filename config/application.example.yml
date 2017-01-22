@@ -7,14 +7,8 @@ defaults: &defaults
     Spectre:
       client_id: 
       service_secret:
-      requests:
-        customers:
-          index: https://www.saltedge.com/api/v3/customers/ 
-        logins:
-          index: https://www.saltedge.com/api/v3/logins
-
-
-
+      base_url: https://www.saltedge.com/api/v3/
+      
 development:
   <<: *defaults
   neat_setting: 800

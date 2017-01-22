@@ -2,22 +2,38 @@ class User::LoginsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    response = SpectreClient.new.request('get', Settings.API.Spectre.requests.logins.index, data:{customer_id: current_user.customer_id})
+    url = Settings.API.Spectre.base_url + 'logins/'
+    response = api.request('get', url, data:{customer_id: current_user.customer_id})
     @logins = JSON.parse(response.body)
   end
 
-  def add_login
-    response = SpectreClient.new.request('post', Settings.API.Spectre.requests.logins.index, data:{
+  def new
+    url = Settings.API.Spectre.base_url + 'logins/'
+    token = api.fetch_token(current_user.customer_id)
+    response = api.request('post', url, data:{
         country_code: 'XF',
         provider_code: 'fakebank_simple_xf',
-        customer_id: current_user.customer_id
+        customer_id: current_user.customer_id,
+        credentials: {
+          login: 'username' + Time.now.to_s,
+          password: 'secret'
+        }
       }
     )
-    if response.code == 200
-      redirect_to action: :index
-    else
+    unless response.code == 200
       flash[:notice] = 'An error occured while creating login!'
-      redirect_to action: :index
     end
+    redirect_to action: :index
+  end
+
+  def show
+    url = Settings.API.Spectre.base_url + 'accounts/'
+    @accounts = JSON.parse(api.request('get', url, data: {login_id: params[:id]}).body)
+  end
+
+  private
+
+  def api
+    SpectreClient.new
   end
 end
