@@ -1,1 +1,10 @@
 %h1 Creating a Login
+
+= form_tag [:user, :logins] do
+  Username
+  = text_field_tag :username
+  %br
+  Password
+  = password_field_tag :password
+  %br
+  = submit_tag 'Login'

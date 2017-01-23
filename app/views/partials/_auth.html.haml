@@ -1,11 +1,11 @@
+
 - if user_signed_in?
-  %p
-    Welcome,
-    = current_user.email
-  = link_to 'Sign Out', destroy_user_session_path, method: :delete
-  = link_to 'Deactivate Account'
-  %br
-  = render partial: 'partials/navigation'
+  .navbar-collapse.collapse.navbar-responsive-collapse
+    %ul.nav.navbar-nav
+      %li= link_to 'Logins', user_logins_path
+      %li= link_to 'Sign Out', destroy_user_session_path, method: :delete
 - else
-  = link_to 'Sign Up', new_user_registration_path
-  = link_to 'Sign In', new_user_session_path
+  .navbar-collapse.collapse.navbar-responsive-collapse
+    %ul.nav.navbar-nav
+      %li= link_to 'Sign Up', new_user_registration_path
+      %li= link_to 'Sign In', new_user_session_path

@@ -1,15 +1,30 @@
 %h1 My Logins
 
-= link_to 'Add new', new_user_login_path
-%table
-  %tr
-    %td Login ID
-    %td Bank
-    %td Status
-  - @logins['data'].each do |login|
+= link_to 'Add new', new_user_login_path, class: 'btn btn-primary'
+%table.table.table-striped
+  %thead
     %tr
-      %td= link_to login['id'], user_login_path(login['id'])
-      %td= login['provider_name']
-      %td= login['status']
-      %td= link_to 'Refresh'
-      %td= link_to 'Destroy'
+      %td Login ID
+      %td Bank
+      %td Status
+      %td Refresh
+      %td Reconnect
+      %td Destroy
+  %tbody
+    - @logins.each do |login|
+      %tr
+        %td= link_to login['id'], user_login_accounts_path(login['id'])
+        %td= login['provider_name']
+        %td= login['status']
+        %td
+          = link_to user_login_refresh_path(login['id']), method: :put do 
+            %span.glyphicon.glyphicon-refresh
+        %td
+          = link_to user_login_reconnect_path(login['id']) do 
+            %span.glyphicon.glyphicon-repeat
+        %td
+          = link_to user_login_path(login['id']), method: :delete do  
+            %span.glyphicon.glyphicon-trash
+
+
+= link_to 'Back', root_path, class: 'btn'

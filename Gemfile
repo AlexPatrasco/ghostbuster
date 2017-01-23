@@ -35,6 +35,7 @@ gem 'devise'
 gem 'haml-rails'
 gem 'settingslogic'
 gem 'rest-client'
+gem 'twitter-bootstrap-rails'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development

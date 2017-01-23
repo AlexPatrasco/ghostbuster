@@ -1,1 +1,7 @@
-%h1 Welcome to the Ghostbuster
+%h1
+  Welcome to the Ghostbuster  
+
+- if user_signed_in?
+  %p
+    You are signed in as 
+    %strong= current_user.email

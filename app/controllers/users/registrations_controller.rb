@@ -17,7 +17,7 @@ before_action :configure_sign_up_params, only: [:create]
         resource.update_attributes(spectre_params)
       end
     else
-      flash[:notice] = 'An issue occured =('
+      flash[:danger] = 'An issue occured while registering!'
       redirect_to root_path
     end
   end

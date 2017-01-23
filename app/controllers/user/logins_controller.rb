@@ -1,39 +1,72 @@
-class User::LoginsController < ApplicationController
-  before_action :authenticate_user!
+class User::LoginsController < UserController
 
   def index
     url = Settings.API.Spectre.base_url + 'logins/'
-    response = api.request('get', url, data:{customer_id: current_user.customer_id})
-    @logins = JSON.parse(response.body)
+    response = api.request('get', url, customer_id: current_user.customer_id)
+    @logins = JSON.parse(response.body)['data']
   end
 
   def new
+
+  end
+
+  def create
     url = Settings.API.Spectre.base_url + 'logins/'
-    token = api.fetch_token(current_user.customer_id)
-    response = api.request('post', url, data:{
+    response = api.request('post', url, data: {
         country_code: 'XF',
         provider_code: 'fakebank_simple_xf',
         customer_id: current_user.customer_id,
         credentials: {
-          login: 'username' + Time.now.to_s,
-          password: 'secret'
+          login: params[:username],
+          password: params[:password]
         }
       }
     )
     unless response.code == 200
-      flash[:notice] = 'An error occured while creating login!'
+      flash[:danger] = 'An error occured while creating login!'
     end
     redirect_to action: :index
   end
 
-  def show
-    url = Settings.API.Spectre.base_url + 'accounts/'
-    @accounts = JSON.parse(api.request('get', url, data: {login_id: params[:id]}).body)
+  def refresh
+    url = Settings.API.Spectre.base_url + "logins/#{params[:id]}/refresh"
+    response = api.request('put', url)
+    if response.code == 200
+      flash[:success] = 'Login refreshed successfully!'
+    else
+      flash[:warning] = 'Could not refresh login!'
+    end
+    redirect_to action: :index
   end
 
-  private
+  def destroy
+    url = Settings.API.Spectre.base_url + "logins/#{params[:id]}"
+    response = api.request('delete', url)
+    if response.code == 200
+      flash[:success] = 'Login removed successfully!'
+    else
+      flash[:warning] = 'Could not remove login!'
+    end
+    redirect_to action: :index
+  end
 
-  def api
-    SpectreClient.new
+  def reconnect
+
+  end
+
+  def request_reconnection
+    url = Settings.API.Spectre.base_url + "logins/#{params[:id]}/reconnect"
+    response = api.request('put', url, data: {
+      credentials: {
+        login: params[:username],
+        password: params[:password]
+      }
+    })
+    if response.code == 200
+      flash[:success] = 'Login reconnected successfully!'
+    else
+      flash[:warning] = 'Could not reconnect login!'
+    end
+    redirect_to action: :index
   end
 end
