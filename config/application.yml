@@ -1,0 +1,21 @@
+# config/application.yml
+defaults: &defaults
+    connection:
+    time_out: 60
+    private_pem_path: /home/alex/projects/private.pem
+  API:
+    Spectre:
+      client_id: MvkmSXVO4uFykCI4Gc743w
+      service_secret: 7CxCyraXL-cvmhlE7Loc-48EVAVQ6VKUNRtftZh8d44
+      base_url: https://www.saltedge.com/api/v3/
+        
+      
+development:
+  <<: *defaults
+  neat_setting: 800
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
