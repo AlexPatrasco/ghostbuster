@@ -1,6 +1,6 @@
 # config/application.yml
 defaults: &defaults
-    connection:
+  connection:
     time_out: 60
     private_pem_path: /home/alex/projects/private.pem
   API:
