@@ -7,7 +7,9 @@ class User::LoginsController < UserController
   end
 
   def new
-
+    response = api.fetch_token(current_user.customer_id, 'customer')
+    @connect_url = JSON.parse(response.body)['data']['connect_url']
+    redirect_to @connect_url
   end
 
   def create

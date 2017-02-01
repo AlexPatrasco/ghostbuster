@@ -31,9 +31,9 @@ class SpectreClient
     end
   end
 
-  def fetch_token(customer_id, fetch_type='recent')
+  def fetch_token(entity_id, entity_type, fetch_type='recent')
     token_url = Settings.API.Spectre.base_url + 'tokens/create'
-    request('post', token_url, data: {customer_id: customer_id, fetch_type: fetch_type, javascript_callback_type: 'iframe'}).body
+    request('post', token_url, data: {"#{entity_type}_id": entity_id, fetch_type: fetch_type, javascript_callback_type: 'iframe'})
   end
 
   private
