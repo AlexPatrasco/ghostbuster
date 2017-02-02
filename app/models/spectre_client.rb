@@ -36,6 +36,19 @@ class SpectreClient
     request('post', token_url, data: {"#{entity_type}_id": entity_id, javascript_callback_type: 'iframe'})
   end
 
+  def fetch_logins(customer_id)
+    url = Settings.API.Spectre.base_url + 'logins/'
+    response = request('get', url, customer_id: customer_id)
+    logins = JSON.parse(response.body)['data']
+    logins.each do |login_params|
+      login_params['login_id'] = login_params.delete('id')
+      login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
+      login_params.slice!(*login_keys)
+      login = Login.where(login_id: login_params['login_id']).first_or_initialize(login_params)
+      login.save
+    end
+  end
+
   private
 
   def signature(hash)

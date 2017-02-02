@@ -13,19 +13,19 @@
   %tbody
     - @logins.each do |login|
       %tr
-        %td= link_to login['id'], user_login_accounts_path(login['id'])
-        %td= login['provider_name']
-        %td= login['status']
+        %td= link_to login.login_id, user_login_accounts_path(login.login_id)
+        %td= login.provider_name
+        %td= login.status
         %td
-          = link_to user_login_refresh_path(login['id']), method: :put do 
+          = link_to user_login_refresh_path(login.login_id), method: :put do 
             %span.fa.fa-refresh
               refresh tipa
         %td
-          = link_to user_login_reconnect_path(login['id']) do 
+          = link_to user_login_reconnect_path(login.login_id) do 
             %span.fa.fa-repeat
               reconnect tipa
         %td
-          = link_to user_login_path(login['id']), method: :delete do  
+          = link_to user_login_path(login.login_id), method: :delete do  
             %span.fa.fa-trash
               destroy tipa
 
