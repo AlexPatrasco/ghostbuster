@@ -2,9 +2,6 @@ class User::LoginsController < UserController
 
   def index
     @logins = current_user.logins
-    # url = Settings.API.Spectre.base_url + 'logins/'
-    # response = api.request('get', url, customer_id: current_user.customer_id)
-    # @logins = JSON.parse(response.body)['data']
   end
 
   def new

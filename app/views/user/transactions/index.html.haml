@@ -11,11 +11,11 @@
   %tbody
     - @transactions.each do |transaction|
       %tr
-        %td= transaction['description']
-        %td= transaction['amount']
-        %td= transaction['currency_code']
-        %td= transaction['made_on']
-        %td= transaction['status']
+        %td= transaction.description
+        %td= transaction.amount
+        %td= transaction.currency_code
+        %td= transaction.made_on
+        %td= transaction.status
 
 
 = link_to 'Back', user_login_accounts_path(params[:login_id]), class: 'btn'

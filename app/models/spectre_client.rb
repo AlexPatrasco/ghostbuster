@@ -39,29 +39,33 @@ class SpectreClient
   def fetch_logins(customer_id)
     url = Settings.API.Spectre.base_url + 'logins/'
     response = request('get', url, customer_id: customer_id)
+    login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
     logins = JSON.parse(response.body)['data']
-    logins.each do |login_params|
-      login_params['login_id'] = login_params.delete('id')
-      login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
-      login_params.slice!(*login_keys)
-      login = Login.where(login_id: login_params['login_id']).first_or_initialize(login_params)
-      login.save
-    end
+    persist_entities(logins, 'login', login_keys)
   end
 
   def fetch_accounts(login_id)
     url = Settings.API.Spectre.base_url + 'accounts/'
     response = request('get', url, login_id: login_id)
+    account_keys = %w(login_id account_id nature name currency_code balance)
     accounts = JSON.parse(response.body)['data']
-    puts "***LOGIN***#{login_id}"
-    accounts.each do |account_params|
-      account_params['account_id'] = account_params.delete('id')
-      account_keys = %w(login_id account_id nature name currency_code balance)
-      account_params.slice!(*account_keys)
-      puts "******#{account_params}"
-      account = Account.where(account_id: account_params['account_id']).first_or_initialize(account_params)
-      account.save
-      # puts "***#{account.errors.full_mess ages}"
+    persist_entities(accounts, 'account', account_keys)
+  end
+
+  def fetch_transactions(account_id)
+    url = Settings.API.Spectre.base_url + 'transactions/'
+    response = request('get', url, account_id: account_id)
+    transaction_keys = %w(transaction_id account_id status description made_on amount currency_code)
+    transactions = JSON.parse(response.body)['data']
+    persist_entities(transactions, 'transaction', transaction_keys)
+  end
+
+  def persist_entities(collection, entity_name, allowed_keys)
+    collection.each do |entity|
+      entity["#{entity_name}_id"] = entity.delete('id')
+      entity.slice!(*allowed_keys)
+      tmp_entity = entity_name.classify.constantize.where("#{entity_name}_id": entity["#{entity_name}_id"]).first_or_initialize(entity)
+      tmp_entity.save
     end
   end
 
@@ -69,8 +73,12 @@ class SpectreClient
     fetch_logins(customer_id)
     Login.where(customer_id: customer_id).each do |login|
       fetch_accounts(login.login_id)
+      login.accounts.each do |account|
+        fetch_transactions(account.account_id)
+      end
     end
   end
+
 
   private
 
