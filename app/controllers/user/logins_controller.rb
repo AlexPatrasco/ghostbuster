@@ -7,38 +7,15 @@ class User::LoginsController < UserController
   end
 
   def new
-    response = api.fetch_token(current_user.customer_id, 'customer')
+    response = api.fetch_token(current_user.customer_id, 'customer', 'create')
     @connect_url = JSON.parse(response.body)['data']['connect_url']
     redirect_to @connect_url
   end
 
-  def create
-    url = Settings.API.Spectre.base_url + 'logins/'
-    response = api.request('post', url, data: {
-        country_code: 'XF',
-        provider_code: 'fakebank_simple_xf',
-        customer_id: current_user.customer_id,
-        credentials: {
-          login: params[:username],
-          password: params[:password]
-        }
-      }
-    )
-    unless response.code == 200
-      flash[:danger] = 'An error occured while creating login!'
-    end
-    redirect_to action: :index
-  end
-
   def refresh
-    url = Settings.API.Spectre.base_url + "logins/#{params[:id]}/refresh"
-    response = api.request('put', url)
-    if response.code == 200
-      flash[:success] = 'Login refreshed successfully!'
-    else
-      flash[:warning] = 'Could not refresh login!'
-    end
-    redirect_to action: :index
+    response = api.fetch_token(params[:id], 'login', 'refresh')
+    @connect_url = JSON.parse(response.body)['data']['connect_url']
+    redirect_to @connect_url
   end
 
   def destroy
@@ -53,22 +30,8 @@ class User::LoginsController < UserController
   end
 
   def reconnect
-
-  end
-
-  def request_reconnection
-    url = Settings.API.Spectre.base_url + "logins/#{params[:id]}/reconnect"
-    response = api.request('put', url, data: {
-      credentials: {
-        login: params[:username],
-        password: params[:password]
-      }
-    })
-    if response.code == 200
-      flash[:success] = 'Login reconnected successfully!'
-    else
-      flash[:warning] = 'Could not reconnect login!'
-    end
-    redirect_to action: :index
+    response = api.fetch_token(params[:id], 'login', 'reconnect')
+    @connect_url = JSON.parse(response.body)['data']['connect_url']
+    redirect_to @connect_url
   end
 end
