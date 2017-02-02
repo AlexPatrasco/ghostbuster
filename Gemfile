@@ -36,6 +36,7 @@ gem 'haml-rails'
 gem 'settingslogic'
 gem 'rest-client'
 gem 'twitter-bootstrap-rails'
+gem 'sidekiq'
 
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
