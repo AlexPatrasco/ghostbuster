@@ -49,6 +49,29 @@ class SpectreClient
     end
   end
 
+  def fetch_accounts(login_id)
+    url = Settings.API.Spectre.base_url + 'accounts/'
+    response = request('get', url, login_id: login_id)
+    accounts = JSON.parse(response.body)['data']
+    puts "***LOGIN***#{login_id}"
+    accounts.each do |account_params|
+      account_params['account_id'] = account_params.delete('id')
+      account_keys = %w(login_id account_id nature name currency_code balance)
+      account_params.slice!(*account_keys)
+      puts "******#{account_params}"
+      account = Account.where(account_id: account_params['account_id']).first_or_initialize(account_params)
+      account.save
+      # puts "***#{account.errors.full_mess ages}"
+    end
+  end
+
+  def fetch_everything(customer_id)
+    fetch_logins(customer_id)
+    Login.where(customer_id: customer_id).each do |login|
+      fetch_accounts(login.login_id)
+    end
+  end
+
   private
 
   def signature(hash)
