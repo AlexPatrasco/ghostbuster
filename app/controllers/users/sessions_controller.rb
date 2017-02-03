@@ -9,7 +9,10 @@ class Users::SessionsController < Devise::SessionsController
   # POST /resource/sign_in
   def create
     super do |resource|
-      FetcherWorker.perform_async(resource.customer_id)
+      # Sync fetching on sign_in
+      SpectreClient.new.fetch_everything(resource.customer_id)
+      # Async fetching on sign in
+      # FetcherWorker.perform_async(resource.customer_id)
     end
   end
 

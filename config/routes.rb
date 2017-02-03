@@ -11,5 +11,8 @@ Rails.application.routes.draw do
     get 'logins/:id/reconnect' => 'logins#reconnect', as: 'login_reconnect'
     put 'logins/:id/reconnect' => 'logins#request_reconnection', as: 'login_reconnection'
   end
+
+  post 'callbacks/success' => 'callbacks#success'
+  post 'callbacks/fail' => 'callbacks#fail'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
