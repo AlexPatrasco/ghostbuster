@@ -100,7 +100,7 @@ class SpectreClient
 
   def remove_login(login_id)
     url = Settings.API.Spectre.base_url + "logins/#{login_id}"
-    response = api.request('delete', url)
+    response = request('delete', url)
     if response.code == 200
       login = Login.find_by(login_id: login_id)
       login.accounts.each do |account|
