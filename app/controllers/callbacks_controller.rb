@@ -11,5 +11,6 @@ class CallbacksController < ApplicationController
     login_id = params[:data][:login_id]
     error_message = params[:data][:error_message]
     flash[:danger] = "Could not update login /##{login_id}! Reason: #{error_message}"
+    flash.keep(:danger)
   end
 end
