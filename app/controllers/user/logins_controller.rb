@@ -20,6 +20,12 @@ class User::LoginsController < UserController
     url = Settings.API.Spectre.base_url + "logins/#{params[:id]}"
     response = api.request('delete', url)
     if response.code == 200
+      login = Login.find_by(login_id: params[:id])
+      login.accounts.each do |account|
+        account.transactions.destroy_all
+        account.destroy
+      end
+      login.destroy
       flash[:success] = 'Login removed successfully!'
     else
       flash[:warning] = 'Could not remove login!'

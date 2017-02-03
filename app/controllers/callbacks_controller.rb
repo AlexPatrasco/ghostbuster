@@ -4,10 +4,23 @@ class CallbacksController < ApplicationController
   def success
     customer_id = params[:data][:customer_id]
     login_id = params[:data][:login_id]
-    SpectreClient.new.fetch_everything(customer_id)
+    api.fetch_login(login_id)
+    api.fetch_accounts(login_id)
+    Login.find_by(login_id: login_id).accounts.each do |account|
+      api.fetch_transactions(account.account_id)
+    end
   end
 
   def fail
+    login_id = params[:data][:login_id]
+    customer_id = params[:data][:customer_id]
+    error_message = params[:data][:error_message]
+    api.update_login(login_id, error_message)
+  end
 
+  private
+
+  def api
+    api = SpectreClient.new
   end
 end

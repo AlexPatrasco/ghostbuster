@@ -33,7 +33,16 @@ class SpectreClient
 
   def fetch_token(entity_id, entity_type, token_type)
     token_url = Settings.API.Spectre.base_url + "tokens/#{token_type}"
-    request('post', token_url, data: {"#{entity_type}_id": entity_id, javascript_callback_type: 'iframe'})
+    request('post', token_url, data: {"#{entity_type}_id": entity_id, javascript_callback_type: 'iframe', return_to: 'http://morning-headland-56331.herokuapp.com/user/logins'})
+  end
+
+  def fetch_login(login_id)
+    url = Settings.API.Spectre.base_url + "logins/#{login_id}"
+    response = request('get', url)
+    login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
+    login = JSON.parse(response.body)['data']
+    login['login_id'] = login.delete('id')
+    Login.find_by(login_id: login_id).update_attributes(login.slice(*login_keys))
   end
 
   def fetch_logins(customer_id)
@@ -67,6 +76,16 @@ class SpectreClient
       tmp_entity = entity_name.classify.constantize.create_with(entity).find_or_initialize_by("#{entity_name}_id": entity["#{entity_name}_id"])
       tmp_entity.new_record? ? tmp_entity.save : tmp_entity.update_attributes(entity)
     end
+  end
+
+  def update_login(login_id, status)
+    url = Settings.API.Spectre.base_url + "logins/#{login_id}"
+    response = request('get', url)
+    login = JSON.parse(response.body)['data']
+    login['login_id'] = login.delete('id')
+    login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
+    login.slice!(*login_keys)
+    Login.find_by(login_id: login_id).update_attributes(login.merge('status': status))
   end
 
   def fetch_everything(customer_id)
