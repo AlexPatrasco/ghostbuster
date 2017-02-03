@@ -9,8 +9,8 @@ class CallbacksController < ApplicationController
 
   def fail
     login_id = params[:data][:login_id]
+    customer_id = params[:data][:customer_id]
     error_message = params[:data][:error_message]
-    flash[:danger] = "Could not update login /##{login_id}! Reason: #{error_message}"
-    flash.keep(:danger)
+    SpectreClient.new.update_login(login_id, error_message)
   end
 end
