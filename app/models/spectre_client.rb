@@ -64,8 +64,8 @@ class SpectreClient
     collection.each do |entity|
       entity["#{entity_name}_id"] = entity.delete('id')
       entity.slice!(*allowed_keys)
-      tmp_entity = entity_name.classify.constantize.where("#{entity_name}_id": entity["#{entity_name}_id"]).first_or_initialize(entity)
-      tmp_entity.save
+      tmp_entity = entity_name.classify.constantize.create_with(entity).find_or_initialize_by("#{entity_name}_id": entity["#{entity_name}_id"])
+      tmp_entity.new_record? ? tmp_entity.save : tmp_entity.update_attributes(entity)
     end
   end
 
