@@ -76,7 +76,7 @@ class SpectreClient
     login['login_id'] = login.delete('id')
     login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
     login.slice!(*login_keys)
-    Login.find_by(login_id: login_id]).update_attributes(login.merge('status': status))
+    Login.find_by(login_id: login_id).update_attributes(login.merge('status': status))
   end
 
   def fetch_everything(customer_id)
