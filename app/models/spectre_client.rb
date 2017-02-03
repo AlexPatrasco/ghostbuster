@@ -98,6 +98,18 @@ class SpectreClient
     end
   end
 
+  def remove_login(login_id)
+    url = Settings.API.Spectre.base_url + "logins/#{login_id}"
+    response = api.request('delete', url)
+    if response.code == 200
+      login = Login.find_by(login_id: login_id)
+      login.accounts.each do |account|
+        account.transactions.destroy_all
+        account.destroy
+      end
+      login.destroy
+    end
+  end
 
   private
 
