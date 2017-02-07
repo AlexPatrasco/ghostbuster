@@ -36,24 +36,19 @@ class SpectreClient
     request('post', token_url, data: {"#{entity_type}_id": entity_id, javascript_callback_type: 'iframe', return_to: 'http://morning-headland-56331.herokuapp.com/user/logins'})
   end
 
-  def fetch_login(login_id)
-    url = Settings.API.Spectre.base_url + "logins/#{login_id}"
-    response = request('get', url)
-    login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
-    login = JSON.parse(response.body)['data']
-    login['login_id'] = login.delete('id')
-    Login.find_by(login_id: login_id).update_attributes(login.slice(*login_keys))
-  end
-
   def fetch_entities(entity_type, parent_id, parent_type)
-    url = Settings.API.Spectre.base_url + entity_type.pluralize
-    response = request('get', url, "#{parent_type}_id": parent_id)
-    entities = JSON.parse(response.body)['data']
+    entities = []
+    if(Settings.Data.priority.index(entity_type) > Settings.Data.priority.index(parent_type))
+      url = Settings.API.Spectre.base_url + entity_type.pluralize
+      response = request('get', url, "#{parent_type}_id": parent_id)
+      entities = JSON.parse(response.body)['data'] || []
+    end
+    entities
   end
 
   def fetch_and_persist(entity_type, parent_id, parent_type)
     entities = fetch_entities(entity_type, parent_id, parent_type)
-    persist_entities(entities, entity_type)
+    persist_entities(entities, entity_type) if entities.size > 0
   end
 
   def persist_entities(collection, entity_type)

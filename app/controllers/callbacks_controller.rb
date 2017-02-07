@@ -4,7 +4,7 @@ class CallbacksController < ApplicationController
   def success
     customer_id = params[:data][:customer_id]
     login_id = params[:data][:login_id]
-    api.fetch_login(login_id)
+    api.update_login(login_id, params[:data][:status])
     api.fetch_and_persist('account', login_id, 'login')
     Login.find_by(login_id: login_id).accounts.each do |account|
       api.fetch_and_persist('transaction', account.account_id, 'account')
