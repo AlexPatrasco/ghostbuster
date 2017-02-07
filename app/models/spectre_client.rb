@@ -36,44 +36,26 @@ class SpectreClient
     request('post', token_url, data: {"#{entity_type}_id": entity_id, javascript_callback_type: 'iframe', return_to: 'http://morning-headland-56331.herokuapp.com/user/logins'})
   end
 
-  def fetch_login(login_id)
-    url = Settings.API.Spectre.base_url + "logins/#{login_id}"
-    response = request('get', url)
-    login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
-    login = JSON.parse(response.body)['data']
-    login['login_id'] = login.delete('id')
-    Login.find_by(login_id: login_id).update_attributes(login.slice(*login_keys))
+  def fetch_entities(entity_type, parent_id, parent_type)
+    entities = []
+    if(Settings.Data.priority.index(entity_type) > Settings.Data.priority.index(parent_type))
+      url = Settings.API.Spectre.base_url + entity_type.pluralize
+      response = request('get', url, "#{parent_type}_id": parent_id)
+      entities = JSON.parse(response.body)['data'] || []
+    end
+    entities
   end
 
-  def fetch_logins(customer_id)
-    url = Settings.API.Spectre.base_url + 'logins/'
-    response = request('get', url, customer_id: customer_id)
-    login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
-    logins = JSON.parse(response.body)['data']
-    persist_entities(logins, 'login', login_keys)
+  def fetch_and_persist(entity_type, parent_id, parent_type)
+    entities = fetch_entities(entity_type, parent_id, parent_type)
+    persist_entities(entities, entity_type) if entities.size > 0
   end
 
-  def fetch_accounts(login_id)
-    url = Settings.API.Spectre.base_url + 'accounts/'
-    response = request('get', url, login_id: login_id)
-    account_keys = %w(login_id account_id nature name currency_code balance)
-    accounts = JSON.parse(response.body)['data']
-    persist_entities(accounts, 'account', account_keys)
-  end
-
-  def fetch_transactions(account_id)
-    url = Settings.API.Spectre.base_url + 'transactions/'
-    response = request('get', url, account_id: account_id)
-    transaction_keys = %w(transaction_id account_id status description made_on amount currency_code)
-    transactions = JSON.parse(response.body)['data']
-    persist_entities(transactions, 'transaction', transaction_keys)
-  end
-
-  def persist_entities(collection, entity_name, allowed_keys)
+  def persist_entities(collection, entity_type)
     collection.each do |entity|
-      entity["#{entity_name}_id"] = entity.delete('id')
-      entity.slice!(*allowed_keys)
-      tmp_entity = entity_name.classify.constantize.create_with(entity).find_or_initialize_by("#{entity_name}_id": entity["#{entity_name}_id"])
+      entity["#{entity_type}_id"] = entity.delete('id')
+      entity.slice!(*Settings.Data.keys.send(entity_type))
+      tmp_entity = entity_type.classify.constantize.create_with(entity).find_or_initialize_by("#{entity_type}_id": entity["#{entity_type}_id"])
       tmp_entity.new_record? ? tmp_entity.save : tmp_entity.update_attributes(entity)
     end
   end
@@ -83,21 +65,32 @@ class SpectreClient
     response = request('get', url)
     login = JSON.parse(response.body)['data']
     login['login_id'] = login.delete('id')
-    login_keys = %w(login_id customer_id provider_id provider_code provider_name status last_success_at)
-    login.slice!(*login_keys)
+    login.slice!(*Settings.Data.keys.login)
     Login.find_by(login_id: login_id).update_attributes(login.merge('status': status))
   end
 
   def fetch_everything(customer_id)
-    fetch_logins(customer_id)
+    fetch_and_persist('login', customer_id, 'customer')
     Login.where(customer_id: customer_id).each do |login|
-      fetch_accounts(login.login_id)
+      fetch_and_persist('account', login.login_id, 'login')
       login.accounts.each do |account|
-        fetch_transactions(account.account_id)
+        fetch_and_persist('transaction', account.account_id, 'account')
       end
     end
   end
 
+  def remove_login(login_id)
+    url = Settings.API.Spectre.base_url + "logins/#{login_id}"
+    response = request('delete', url)
+    if response.code == 200
+      login = Login.find_by(login_id: login_id)
+      login.accounts.each do |account|
+        account.transactions.destroy_all
+        account.destroy
+      end
+      login.destroy
+    end
+  end
 
   private
 
@@ -115,6 +108,6 @@ class SpectreClient
   end
 
   def as_json(data)
-    data.empty? ? '' : data.to_json
+    data.nil? ? '' : data.to_json
   end
 end

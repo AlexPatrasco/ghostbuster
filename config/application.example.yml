@@ -8,10 +8,15 @@ defaults: &defaults
       client_id: 
       service_secret:
       base_url: https://www.saltedge.com/api/v3/
-      
+  Data:
+    priority: [customer, login, account, transaction]
+    keys:
+      login: [login_id, customer_id, provider_id, provider_code, provider_name, status, last_success_at]
+      account: [login_id, account_id, nature, name, currency_code, balance]
+      transaction: [transaction_id, account_id, status, description, made_on, amount, currency_code]
+        
 development:
   <<: *defaults
-  neat_setting: 800
 
 test:
   <<: *defaults
